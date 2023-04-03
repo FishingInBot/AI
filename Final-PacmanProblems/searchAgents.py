@@ -343,7 +343,7 @@ class CornersProblem(search.SearchProblem):
 
                 if nextPosition in self.corners:
                     cornersStatus[self.corners.index(nextPosition)] = True
-                    
+
                 successors.append(((nextPosition, cornersStatus), action, 1))
 
         self._expanded += 1  # DO NOT CHANGE
@@ -487,9 +487,22 @@ def foodHeuristic(state: Tuple[Tuple, List[List]], problem: FoodSearchProblem):
     Subsequent calls to this heuristic can access
     problem.heuristicInfo['wallCount']
     """
-    position, foodGrid = state
+    myPos, foodGrid = state
     "*** YOUR CODE HERE ***"
-    return 0
+    sPos = problem.startingGameState
+    fPos = foodGrid.asList()
+    heuristic = float("-inf")
+
+    # Returns 0 if there isn't any food.
+    if len(fPos) == 0:
+        return 0
+
+    # Returns maximum distance between the current position and the farthest food.
+    for f in fPos:
+        fDist = mazeDistance(myPos, f, sPos)
+        if fDist > heuristic:
+            heuristic = fDist
+    return heuristic
 
 class ClosestDotSearchAgent(SearchAgent):
     "Search for all food using a sequence of searches"
