@@ -87,10 +87,12 @@ def depthFirstSearch(problem: SearchProblem):
     print("Start's successors:", problem.getSuccessors(problem.getStartState()))
     """
     "*** YOUR CODE HERE ***"
-    state = problem.getStartState()
-    visited = []
+    #TODO comment this.
     stack = util.Stack()
+    visited = []
+    state = problem.getStartState()
     stack.push((state, []))
+    
     while not stack.isEmpty():
         state, path = stack.pop()
         if state not in visited:
@@ -104,10 +106,12 @@ def depthFirstSearch(problem: SearchProblem):
 def breadthFirstSearch(problem: SearchProblem):
     """Search the shallowest nodes in the search tree first."""
     "*** YOUR CODE HERE ***"
-    state = problem.getStartState()
-    visited = []
+    #TODO comment this.
     queue = util.Queue()
+    visited = []
+    state = problem.getStartState()
     queue.push((state, []))
+
     while not queue.isEmpty():
         state, path = queue.pop()
         if state not in visited:
@@ -121,10 +125,12 @@ def breadthFirstSearch(problem: SearchProblem):
 def uniformCostSearch(problem: SearchProblem):
     """Search the node of least total cost first."""
     "*** YOUR CODE HERE ***"
-    state = problem.getStartState()
-    visited = []
+    #TODO comment this.
     queue = util.PriorityQueue()
+    visited = []
+    state = problem.getStartState()
     queue.push((state, []), 0)
+
     while not queue.isEmpty():
         state, path = queue.pop()
         if state not in visited:
@@ -144,10 +150,12 @@ def nullHeuristic(state, problem=None):
 def aStarSearch(problem: SearchProblem, heuristic=nullHeuristic):
     """Search the node that has the lowest combined cost and heuristic first."""
     "*** YOUR CODE HERE ***"
-    state = problem.getStartState()
-    visited = []
+    #TODO comment this.
     queue = util.PriorityQueue()
+    visited = []
+    state = problem.getStartState()
     queue.push((state, []), 0)
+
     while not queue.isEmpty():
         state, path = queue.pop()
         if state not in visited:
