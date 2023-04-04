@@ -412,6 +412,7 @@ def positionLogicPlan(problem) -> List:
 
     # for each time step 
     for time in range(50):
+        print("im working here: ", time)
 
         # pacman can only be in one spot at any given time and he can't be in a wall
         KB.append(exactlyOne([PropSymbolExpr(pacman_str, x, y, time = time) for x, y in  non_wall_coords]))
