@@ -22,6 +22,7 @@ import util
 import sys
 import logic
 import game
+import logic_utils
 
 from logic import conjoin, disjoin
 from logic import PropSymbolExpr, Expr, to_cnf, pycoSAT, parseExpr, pl_true
@@ -50,13 +51,17 @@ def sentence1() -> Expr:
     (not A) or (not B) or C
     """
     "*** BEGIN YOUR CODE HERE ***"
+    # define expressions
     A = Expr('A')
     B = Expr('B')
     C = Expr('C')
+
+    # define sentences
     first = A | B
     second = ~A % (~B | C)
     third = disjoin(~A , ~B , C)
-    print(third)
+
+    # return the conjunction of the sentences
     return conjoin(first, second, third)
     "*** END YOUR CODE HERE ***"
 
@@ -70,14 +75,19 @@ def sentence2() -> Expr:
     (not D) implies C
     """
     "*** BEGIN YOUR CODE HERE ***"
+    # define expressions
     A = Expr('A')
     B = Expr('B')
     C = Expr('C')
     D = Expr('D')
+
+    # define sentences
     first = C % (B | D)
     second = A >> (~B & ~D)
     third = ~(B & ~C) >> A
     fourth = ~D >> C
+
+    # return the conjunction of the sentences
     return conjoin(first, second, third, fourth)
     "*** END YOUR CODE HERE ***"
 
@@ -95,13 +105,18 @@ def sentence3() -> Expr:
     Pacman is born at time 0.
     """
     "*** BEGIN YOUR CODE HERE ***"
+    # define expressions
     PacmanAlive_0 = PropSymbolExpr('PacmanAlive_0')
     PacmanAlive_1 = PropSymbolExpr('PacmanAlive_1')
     PacmanBorn_0 = PropSymbolExpr('PacmanBorn_0')
     PacmanKilled_0 = PropSymbolExpr('PacmanKilled_0')
+    
+    # define sentences
     first = PacmanAlive_1 % ((PacmanAlive_0 & ~PacmanKilled_0) | (~PacmanAlive_0 & PacmanBorn_0))
     second = ~(PacmanAlive_0 & PacmanBorn_0)
     third = PacmanBorn_0
+
+    # return the conjunction of the sentences
     return conjoin(first, second, third)
     "*** END YOUR CODE HERE ***"
 
@@ -118,15 +133,19 @@ def findModelUnderstandingCheck() -> Dict[Expr, bool]:
     """
     a = Expr('A')
     "*** BEGIN YOUR CODE HERE ***"
-    print("a.__dict__ is:", a.__dict__) # might be helpful for getting ideas
-    util.raiseNotDefined()
+    print("A.__dict__ is:", a.__dict__) # might be helpful for getting ideas
+
+    # change value of op to lowercase 'a' and return the dictionary
+    a.__dict__['op'] = 'a'
+    return {a:True}
     "*** END YOUR CODE HERE ***"
 
 def entails(premise: Expr, conclusion: Expr) -> bool:
     """Returns True if the premise entails the conclusion and False otherwise.
     """
     "*** BEGIN YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    # return the conjunction of the premise and the negation of the conclusion
+    return findModel(conjoin(premise, ~conclusion)) == False
     "*** END YOUR CODE HERE ***"
 
 def plTrueInverse(assignments: Dict[Expr, bool], inverse_statement: Expr) -> bool:
@@ -134,7 +153,8 @@ def plTrueInverse(assignments: Dict[Expr, bool], inverse_statement: Expr) -> boo
     pl_true may be useful here; see logic.py for its description.
     """
     "*** BEGIN YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    # return the negation of the inverse statement
+    return pl_true(~inverse_statement, assignments)
     "*** END YOUR CODE HERE ***"
 
 #______________________________________________________________________________
@@ -160,7 +180,8 @@ def atLeastOne(literals: List[Expr]) -> Expr:
     True
     """
     "*** BEGIN YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    # return the disjunction of all statements.
+    return disjoin(literals)
     "*** END YOUR CODE HERE ***"
 
 
@@ -172,7 +193,8 @@ def atMostOne(literals: List[Expr]) -> Expr:
     itertools.combinations may be useful here.
     """
     "*** BEGIN YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    # returns the negation of the conjunction of all combinations of two literals
+    return conjoin([ ~i[0] | ~i[1] for i in itertools.combinations(literals, 2)])
     "*** END YOUR CODE HERE ***"
 
 
@@ -183,7 +205,8 @@ def exactlyOne(literals: List[Expr]) -> Expr:
     the expressions in the list is true.
     """
     "*** BEGIN YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    #return the conjunction of atLeastOne and atMostOne
+    return conjoin([atLeastOne(literals), atMostOne(literals)])
     "*** END YOUR CODE HERE ***"
 
 #______________________________________________________________________________
@@ -216,7 +239,8 @@ def pacmanSuccessorAxiomSingle(x: int, y: int, time: int, walls_grid: List[List[
         return None
     
     "*** BEGIN YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    #return the disjunction of all possible causes for P[x,y]_t
+    return PropSymbolExpr(pacman_str, x, y, time=now) % disjoin(possible_causes)
     "*** END YOUR CODE HERE ***"
 
 
@@ -287,7 +311,23 @@ def pacphysicsAxioms(t: int, all_coords: List[Tuple], non_outer_wall_coords: Lis
     pacphysics_sentences = []
 
     "*** BEGIN YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    # for all (x, y) in all_coords: If a wall is at (x, y) --> Pacman is not at (x, y)
+    for x, y in all_coords:
+        pacphysics_sentences.append(PropSymbolExpr(wall_str, x, y) >> ~PropSymbolExpr(pacman_str, x, y, time=t))
+
+    # Pacman is at exactly one of the squares at timestep t.
+    pacphysics_sentences.append(exactlyOne([PropSymbolExpr(pacman_str, x, y, time=t) for x, y in non_outer_wall_coords]))
+
+    # Pacman takes exactly one action at timestep t.
+    pacphysics_sentences.append(exactlyOne([PropSymbolExpr(action, time=t) for action in DIRECTIONS]))
+    
+    # Results of calling sensorModel(...), unless None.
+    if sensorModel:
+        pacphysics_sentences.append(sensorModel(t, non_outer_wall_coords))
+    
+    # Results of calling successorAxioms()
+    if successorAxioms and t > 0:
+        pacphysics_sentences.append(successorAxioms(t, walls_grid, non_outer_wall_coords))
     "*** END YOUR CODE HERE ***"
 
     return conjoin(pacphysics_sentences)
@@ -321,7 +361,26 @@ def checkLocationSatisfiability(x1_y1: Tuple[int, int], x0_y0: Tuple[int, int], 
     KB.append(conjoin(map_sent))
 
     "*** BEGIN YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    # add pacphysicsAxioms
+    KB.append(pacphysicsAxioms(0, all_coords, non_outer_wall_coords))
+    KB.append(pacphysicsAxioms(1, all_coords, non_outer_wall_coords))
+
+    # add current location
+    KB.append(PropSymbolExpr(pacman_str, x0, y0, time=0))
+
+    # add actions
+    KB.append(PropSymbolExpr(action0, time=0))
+    KB.append(PropSymbolExpr(action1, time=1))
+
+    # add successor axioms
+    KB.append(allLegalSuccessorAxioms(1, walls_grid, non_outer_wall_coords))
+
+    # find models
+    model1 = findModel(conjoin(KB + [PropSymbolExpr(pacman_str, x1, y1, time=1)]))
+    model2 = findModel(conjoin(KB + [~PropSymbolExpr(pacman_str, x1, y1, time=1)]))
+    
+    # return models
+    return model1, model2
     "*** END YOUR CODE HERE ***"
 
 #______________________________________________________________________________
@@ -348,7 +407,28 @@ def positionLogicPlan(problem) -> List:
     KB = []
 
     "*** BEGIN YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    # add pacman's starting location
+    KB.append(PropSymbolExpr(pacman_str, x0, y0, time = 0))
+
+    # for each time step 
+    for time in range(50):
+
+        # pacman can only be in one spot at any given time and he can't be in a wall
+        KB.append(exactlyOne([PropSymbolExpr(pacman_str, x, y, time = time) for x, y in  non_wall_coords]))
+
+        # use findModel to check if there is a model that satisfies the goal
+        model = findModel(conjoin(KB + [PropSymbolExpr(pacman_str, xg, yg, time = time)]))
+        
+        # if there is, return a actions sequence
+        if model != False:
+            return extractActionSequence(model,  actions)
+        
+        # pacman takes only one step at a time
+        KB.append(exactlyOne([PropSymbolExpr(d, time=time) for d in actions]))
+        
+        # add successor axioms for all possible locations
+        for x, y, in non_wall_coords:
+            KB.append(pacmanSuccessorAxiomSingle(x, y, time+1, walls_grid))
     "*** END YOUR CODE HERE ***"
 
 #______________________________________________________________________________
