@@ -27,7 +27,8 @@ In knights Isolation, tokens can move to any open cell that is rows-2 and column
 **Note:** my implementation is the CustomPlayer method. Theoretically, at some high depth two CustomPlayers will fill the board against eachother, though this will take some time.
 
 ## Pacman Project
-This is my implementation of Berkeley's Pacman AI project, https://inst.eecs.berkeley.edu/~cs188/sp23/projects/. I have not implemented "Project 0".
+This is my implementation of Berkeley's Pacman AI project, https://inst.eecs.berkeley.edu/~cs188/sp23/projects/. 
+I have not implemented "Project 0".
 
 ### Project 1: Search
 This implements several search algorithms to complete certain mazes based on different objectives.
